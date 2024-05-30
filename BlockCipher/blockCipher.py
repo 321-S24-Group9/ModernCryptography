@@ -211,8 +211,12 @@ def task2():
     # input = "BBBBBBAadminAtrueA"
     ciphertext = submit(input,key,iv)
     new_ciphertext = modify_ciphertext_to_include_admin(ciphertext,input,";admin=true;")
-    print(f"original ciphertext: {verify(ciphertext,key,iv)}")
-    print(f"modified ciphertext: {verify(new_ciphertext,key,iv)}")
+    print(f"input : {input}")
+    print(f"ciphertext : {ciphertext}")
+    print(f"new ciphertext : {new_ciphertext}")
+    
+    print(f"verify ciphertext: {verify(ciphertext,key,iv)}")
+    print(f"verify new ciphertext: {verify(new_ciphertext,key,iv)}")
 
 def task3():
     # Example OpenSSL output
@@ -232,8 +236,8 @@ def task3():
 
 def main():
     # task1()
-    # task2()
-    task3()
+    task2()
+    # task3()
    
 if __name__ == "__main__":
     main()
