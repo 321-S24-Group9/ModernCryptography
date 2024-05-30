@@ -11,12 +11,8 @@ import matplotlib.pyplot as plt
 BLOCK_SIZE = 16
 BMP_HEADER = 54
 
-# PKCS#7 padding
-# def pad(data):
-#     padding_len = BLOCK_SIZE - len(data) % BLOCK_SIZE
-#     padding = bytes([padding_len] * padding_len)
-#     return data + padding
-
+## TASK 1
+ 
 def encrypt_ecb(plaintext, key):
     cipher = AES.new(key, AES.MODE_ECB)
     ciphertext = b''
@@ -83,6 +79,8 @@ def encrypt_file(input_file, flag):
         # shouldn't get here
         print(f"invalid flag got {flag}")
 
+## Task 2
+
 def url_encode(input):
     # Define the characters to be encoded
     special_chars = ";="
@@ -101,17 +99,7 @@ def submit(input,key,iv):
     plaintext = pad((url_encode(prepend + input + postpend)).encode('utf-8'),BLOCK_SIZE)
     return  encrypt_cbc(plaintext,key,iv)
 
-def modify_ciphertext(ciphertext, input):
-    # offset = (len("userid=456;userdata=") // BLOCK_SIZE)
-    offset = 32
-    target = b";admin=true;"
-    input_arr = bytearray(input.encode('utf-8'))
-    ciph_arr = bytearray(ciphertext)
-    for i in range(len(target)):
-        ciph_arr[i + offset] ^= input_arr[i] ^ target[i]
-    return bytes(ciph_arr)
-    
-def modify_ciphertext_to_include_admin(ciphertext, input, target_payload):
+def modify_ciphertext(ciphertext, input, target_payload):
     pos = len(url_encode("userid=456;userdata="))
     offset = BLOCK_SIZE - pos % BLOCK_SIZE
     block_position = BLOCK_SIZE
@@ -129,8 +117,10 @@ def verify(input, key, iv):
     # Check if the decrypted string contains the pattern ";admin=true;"
     return b";admin=true;" in decrypted
 
+## Task 3
+
 def parse_rsa(output):
-    # Regular expression to extract the relevant RSA benchmark data
+    # used Chat-gpt to generate a reg-ex to search through file format
     rsa_pattern = r"rsa\s+(\d+)\s+bits\s+([\d\.]+)s\s+([\d\.]+)s\s+([\d\.]+)\s+([\d\.]+)"
     rsa_results = re.findall(rsa_pattern, output)
     
@@ -146,6 +136,7 @@ def parse_rsa(output):
     return rsa_throughput
 
 def parse_aes(output):
+    # used Chat-gpt to generate a reg-ex to search through file format
     aes_pattern = r"aes-(\d+)-cbc\s+([\d\.]+)k\s+([\d\.]+)k\s+([\d\.]+)k\s+([\d\.]+)k\s+([\d\.]+)k\s+([\d\.]+)k"
     aes_results = re.findall(aes_pattern, output)
     
@@ -189,8 +180,6 @@ def plot_aes_throughput(aes_throughput):
     plt.savefig("./BlockCipher/aes_plot")
     plt.show()
 
-
-
 def task1():
     # Task 1
     parser = argparse.ArgumentParser(description="Block Cipher")
@@ -210,7 +199,7 @@ def task2():
     input = "You're the man now, dog"
     # input = "BBBBBBAadminAtrueA"
     ciphertext = submit(input,key,iv)
-    new_ciphertext = modify_ciphertext_to_include_admin(ciphertext,input,";admin=true;")
+    new_ciphertext = modify_ciphertext(ciphertext,input,";admin=true;")
     print(f"input : {input}")
     print(f"ciphertext : {ciphertext}")
     print(f"new ciphertext : {new_ciphertext}")
@@ -219,7 +208,6 @@ def task2():
     print(f"verify new ciphertext: {verify(new_ciphertext,key,iv)}")
 
 def task3():
-    # Example OpenSSL output
     with open('./BlockCipher/rsa.txt','r') as file:
         rsa_output = file.read()
     print(rsa_output)
