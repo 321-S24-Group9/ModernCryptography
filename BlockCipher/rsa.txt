@@ -1,0 +1,10 @@
+version: 3.1.1
+built on: Thu Jun 22 07:21:55 2023 UTC
+options: bn(64,64)
+compiler: gcc -m64 -Wall -O3 -DL_ENDIAN -DOPENSSL_PIC -DUNICODE -D_UNICODE -DWIN32_LEAN_AND_MEAN -D_MT -DOPENSSL_BUILDING_OPENSSL -DZLIB -DZLIB_SHARED -DNDEBUG -DOPENSSLBIN="\"/mingw64/bin\""
+CPUINFO: OPENSSL_ia32cap=0xfffaf38bffcbffff:0x184007a4239c27a9
+                  sign    verify    sign/s verify/s
+rsa  512 bits 0.000015s 0.000002s  65110.7 533074.7
+rsa 1024 bits 0.000076s 0.000004s  13082.9 234288.8
+rsa 2048 bits 0.000402s 0.000010s   2488.0  97735.5
+rsa 4096 bits 0.002930s 0.000056s    341.3  17726.2
