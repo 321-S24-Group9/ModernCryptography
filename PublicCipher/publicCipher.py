@@ -355,7 +355,11 @@ def rsa_decrypt(message,d,n):
     hex_string = hex(num_message)[2:]
     if len(hex_string) % 2 != 0:
         hex_string = '0' + hex_string
-    return binascii.unhexlify(hex_string).decode('utf-8')
+    try:
+        return binascii.unhexlify(hex_string).decode('utf-8')
+    except:
+        return binascii.unhexlify(hex_string)
+
 
 def rsa_malleability():
     # generate RSA keys
@@ -418,7 +422,7 @@ def rsa_malleability():
     Mallory.set_key(k_Mal.digest()[:16])
 
     # prints the secret message
-    print(Mallory.decrypt_message(Mal_C0))
+    print(f"Mallory intercepts secret message from Alice to Bob: {Mallory.decrypt_message(Mal_C0)}")
 
     # lets do more damage by sending a message
     # from Mallory as Bob
@@ -428,7 +432,7 @@ def rsa_malleability():
 
     # now lets decrypt our mailbox and read the message
     Alice.decrypt_mailbox()
-    print(Alice.read_mailbox()[0])
+    print(f"Message from Bob (actually Mallory) {Alice.read_mailbox()[0]}")
 
 
 def rsa_signature():
@@ -484,23 +488,31 @@ def rsa_signature():
     Mal_sig2 = Mallory.intercept(Bob,1)
 
     m1, m2 = Bob.read_mailbox(2)
-    m1 = rsa_decrypt(m1,Alice_e, Alice_n)
-    m2 = rsa_decrypt(m2,Alice_e, Alice_n)
-    print(m1)
-    print(m2)
+    m1_dec = rsa_decrypt(m1,Alice_e, Alice_n)
+    m2_dec = rsa_decrypt(m2,Alice_e, Alice_n)
+    print(f"Message1 recieved from Alice: {m1_dec}")
+    print(f"Message2 recieved from Alice {m2_dec}")
 
     # draft a new signature to trick Bob
     Mal_sig3 = (Mal_sig1 * Mal_sig2) % Mal_n
-    print(Mal_sig3)
     Mallory.send(Bob,Mal_sig3)
 
+    # Bob reads the signature and gets a valid message
     m3 = Bob.read_mailbox()[0]
-    m3 = rsa_decrypt(m3,Alice_e,Alice_n)
-    print(m3)
+    m3_dec = rsa_decrypt(m3,Alice_e,Alice_n)
+    print(f"Message3 recieved from Alice (this one is actually Mallary's) {m3_dec}")
 
-    
+    # Verify that this message is the same as rsa_encrypt(m1*m2)
+    m1_num = int(binascii.hexlify(m1_dec.encode()).decode(),16)
+    m2_num = int(binascii.hexlify(m2_dec.encode()).decode(),16)
+    enc_msg = pow(m1_num*m2_num,Alice_d,Alice_n)
+    real_msg = rsa_decrypt(enc_msg,Alice_e,Alice_n)
+    if real_msg != m3_dec:
+        print("Error: Mallary's signature didn't work")
+    else:
+        print("Mallary's signature works and is equal to Message1*Message2")
 
-   
+
 
 def task3():
     public_key, private_key = generate_symm_keys()
@@ -512,22 +524,19 @@ def task3():
     if message != decrypted:
         print("Error: rsa encryption didn't work")
         return 
-    # shows how MIMT can get secret message
-    # another way to cause chaos
+    # shows how MIMT can intercept a secret message
+    # Another way to cause chaos
     # use the key to send a message to Alice
     # we can see that Alice recieves a message from Mallary
     # thinking it was from Bob
     rsa_malleability()
 
     # lastly, suppose Mallory sees two signatures from Alice
-    # still need to implement
+    # creates a message that passes the signature
+    # comes from idea that m1^d * m2^d (mod n) == (m1*m2)^d (mod n)
     rsa_signature()
 
     
-    
-    
-
-
 def main():
     # task1()
     # task2()
