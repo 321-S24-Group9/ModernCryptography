@@ -134,8 +134,8 @@ def DH(Alice_p,Alice_g):
     Bob.decrypt_mailbox()
 
     #read the decrypted mailbox
-    print(Alice.read_mailbox()[0])
-    print(Bob.read_mailbox()[0])
+    print(f"Alice reads in mailbox: {Alice.read_mailbox()[0]}")
+    print(f"Bob reads in mailbox: {Bob.read_mailbox()[0]}")
 
 ## TASK 2
 
